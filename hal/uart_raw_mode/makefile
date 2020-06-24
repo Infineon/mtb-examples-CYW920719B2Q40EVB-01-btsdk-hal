@@ -31,30 +31,31 @@
 # so agrees to indemnify Cypress against all liability.
 #
 
+ifeq ($(WHICHFILE),true)
+$(info Processing $(lastword $(MAKEFILE_LIST)))
+endif
+
 #
 # Basic Configuration
 #
-APPNAME=HAL_I2C_MASTER
+APPNAME=HAL_UARTRawMode
 TOOLCHAIN=GCC_ARM
 CONFIG=Debug
 VERBOSE=
 
 # default target
 TARGET=CYW920719B2Q40EVB-01
-
 SUPPORTED_TARGETS = \
   CYW920819EVB-02 \
   CYW920820EVB-02 \
-  CYW989820EVB-01 \
-  CYW920719B2Q40EVB-01 \
-  CYW920735Q60EVB-01
+  CYW920721B2EVK-02 \
+  CYW920719B2Q40EVB-01
 
 TARGET_DEVICE_MAP = \
   CYW920819EVB-02/20819A1 \
   CYW920820EVB-02/20820A1 \
-  CYW989820EVB-01/20820A1 \
-  CYW920719B2Q40EVB-01/20719B2 \
-  CYW920735Q60EVB-01/20735B1
+  CYW920721B2EVK-02/20721B2 \
+  CYW920719B2Q40EVB-01/20719B2
 
 CY_TARGET_DEVICE = $(patsubst $(TARGET)/%,%,$(filter $(TARGET)%,$(TARGET_DEVICE_MAP)))
 
@@ -102,26 +103,17 @@ CY_APP_DEFINES+=-DENABLE_DEBUG=1
 endif
 
 CY_APP_DEFINES+=\
-    -DWICED_BT_TRACE_ENABLE \
-
-ifeq ($(TARGET),CYW920706WCDEVAL)
-USE_256K_SECTOR_SIZE ?= 0
-ifeq ($(USE_256K_SECTOR_SIZE),1)
-CY_APP_DEFINES += -DUSE_256K_SECTOR_SIZE
-endif
-endif # TARGET
-
-ifeq ($(OTA_FW_UPGRADE),1)
-OTA_SEC_FW_UPGRADE ?= 0
-ifeq ($(OTA_SEC_FW_UPGRADE), 1)
-CY_APP_DEFINES += -DOTA_SECURE_FIRMWARE_UPGRADE
-endif
-endif
+    -DWICED_BT_TRACE_ENABLE
 
 #
 # Components (middleware libraries)
 #
 COMPONENTS +=bsp_design_modus
+
+#
+# App Patch libs
+#
+CY_APP_PATCH_LIBS += wiced_uart_raw_mode_lib.a
 
 ################################################################################
 # Paths
@@ -173,6 +165,9 @@ endif
 
 # path to WICED tools root folder
 CY_WICED_TOOLS_ROOT?=$(CY_SHARED_PATH)/dev-kit/btsdk-tools
+
+# tools that can be launched with "make open CY_OPEN_TYPE=<tool>
+CY_BT_APP_TOOLS=BTSpy ClientControl
 
 # getlibs path
 CY_GETLIBS_PATH=.
